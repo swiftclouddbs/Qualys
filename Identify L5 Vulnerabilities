@@ -1,0 +1,26 @@
+#Qualys Level 5 Application Vulnerabilities & merge with poc table
+
+import pandas as pd
+#get data
+df = pd.read_csv(r"C:\Users\rstuartii\Documents\reggie\Qualys\Scan_Reports\Scan-Report-1.csv")
+
+L5 = df.loc[df['Severity'] == 5]
+L5V = L5[L5['Type'].str.contains("Vuln")]
+
+app_updates = L5V[L5V['Title'].str.contains("Windows Security Update") == False]
+
+app_update_slim = app_updates[['IP','DNS','Title']]
+
+
+#join to poc
+sys_con = pd.read_csv((r"C:\Users\rstuartii\Documents\reggie\Qualys\SystemsOwnershipTable.csv"))
+sys_con_use = sys_con[['INTERNAL IP','PRIMARY TECHNICAL CONTACT']]
+sys_con_use = sys_con_use.rename(columns={'INTERNAL IP' : 'IP'})
+
+app_patch_list_with_poc = pd.merge(app_update_slim, sys_con_use, on='IP')
+
+
+
+
+#Write file
+app_patch_list_with_poc.to_csv((r"C:\Users\rstuartii\Documents\reggie\Qualys\Remediation\L5_app_vulnerabilities.csv"))
